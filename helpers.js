@@ -156,3 +156,117 @@ function when(predicate, fn) {
     }
   };
 }
+
+function compose2(fn2, fn1) {
+  return function composed(origValue) {
+    return fn2(fn1(origValue));
+  };
+}
+
+function compose(...fns) {
+  return function composed(result) {
+    // copy the array of functions
+    var list = [...fns];
+
+    while (list.length > 0) {
+      // take the last function off the end of the list and execute it
+      result = list.pop()(result);
+    }
+
+    return result;
+  };
+}
+
+function compose_(...fns) {
+  return function composed(result) {
+    return [...fns]
+      .reverse()
+      .reduce(function reducer(result, fn) {
+        return fn(result);
+      }, result);
+  };
+}
+
+function compose__(...fns) {
+  return fns
+    .reverse()
+    .reduce(function reducer(fn1, fn2) {
+      return function composed(...args) {
+        return fn2(fn1(...args));
+      };
+    });
+}
+
+function compose___(...fns) {
+  let result;
+
+  // pull off the last two arguments
+  var [fn1, fn2, ...rest] = fns.reverse();
+
+  var composedFn = function composed(...args) {
+    return fn2(fn1(...args));
+  };
+
+  if (rest.length == 0) {
+    result = composedFn;
+  } else {
+    result = compose(...rest.reverse(), composedFn);
+  }
+
+  return result;
+}
+
+function pipe(...fns) {
+  return function piped(result) {
+    var list = [...fns];
+
+    while (list.length > 0) {
+      // take the first function from the list and execute it
+      result = list.shift()(result);
+    }
+
+    return result;
+  };
+}
+
+// var pipe = reverseArgs(compose);
+
+function conditionallyStoreData(store, location, value, checkFn) {
+  if (checkFn(value, store, location)) {
+    store[location] = value;
+  }
+}
+
+function notEmpty(val) { return val != ''; }
+
+function isUndefined(val) { return val === undefined; }
+
+function isPropUndefined(val, obj, prop) {
+  return isUndefined(obj[prop]);
+}
+
+function prop(name, obj) {
+  return obj[name];
+}
+
+function setProp(name, obj, val) {
+  var o = Object.assign({}, obj);
+
+  o[name] = val;
+
+  return o;
+}
+
+function makeObjProp(name, value) {
+  return setProp(name, {}, value);
+}
+
+var getPerson = partial(ajax, 'http://some.api/person');
+var getLastOrder = partial(ajax, 'http://some.api/order', { id: -1 });
+var extractName = partial(prop, 'name');
+var outputPersonName = compose(output, extractName);
+var processPerson = partialRight(getPerson, outputPersonName);
+var personData = partial(makeObjProp, 'id');
+var extractPersonId = partial(prop, 'personId');
+var lookupPerson = compose(processPerson, personData, extractPersonId);
+// getLastOrder(lookupPerson);
