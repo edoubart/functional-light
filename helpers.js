@@ -270,3 +270,17 @@ var personData = partial(makeObjProp, 'id');
 var extractPersonId = partial(prop, 'personId');
 var lookupPerson = compose(processPerson, personData, extractPersonId);
 // getLastOrder(lookupPerson);
+
+function safer_impureFunctionWithSideCausesAndEffects(/*..*/) {
+  // 1. Capture the to-be-affected current states
+
+  // 2. Set initial input states
+
+  // 3. Run the impure function
+
+  // 4. Capture the side effect states
+
+  // 5. Restore the original states
+
+  // 6. Return the captured side effect states
+}
