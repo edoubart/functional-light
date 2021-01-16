@@ -284,3 +284,29 @@ function safer_impureFunctionWithSideCausesAndEffects(/*..*/) {
 
   // 6. Return the captured side effect states
 }
+
+// Continuation Passing Style (CPS)
+function fib(n, cont = identity) {
+  if (n <= 1) return cont(n);
+
+  return fib(
+    n - 2,
+    n2 => fib(
+      n - 1,
+      n1 => cont(n2 + n1)
+    )
+  );
+}
+
+// Trampolines
+function trampoline(fn) {
+  return function trampolined(...args) {
+    var result = fn(...args);
+
+    while (typeof result == 'function') {
+      result = result();
+    }
+
+    return result;
+  };
+}
